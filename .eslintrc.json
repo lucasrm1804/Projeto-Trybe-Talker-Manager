@@ -2,7 +2,7 @@
   "env": {
     "es2020": true
   },
-  "extends": "trybe-backend",
+  "extends": ["trybe-backend", "pritter" ],
   "rules": {
     "sonarjs/no-duplicate-string": ["error", 5]
   }
