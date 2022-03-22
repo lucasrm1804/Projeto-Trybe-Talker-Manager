@@ -40,7 +40,7 @@ app.post('/login', (req, res) => {
   if (msg) {
     return res.status(400).json({ message: msg });
   } 
-  return res.status(200).json({ token: toke });
+  return res.status(HTTP_OK_STATUS).json({ token: toke });
 });
 
 app.listen(PORT, () => {
