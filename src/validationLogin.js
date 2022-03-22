@@ -22,13 +22,12 @@ const validPassFormat = (password) => {
   if (password.length < SEIS) {
     return 'O "password" deve ter pelo menos 6 caracteres';
   }
-}
+};
 
-const validationLogin = (email, password) => {
-  return validEmailEmpty(email)
+const validationLogin = (email, password) =>
+   validEmailEmpty(email)
   || validEmailFormat(email)
   || validPassEmpty(password)
-  || validPassFormat(password)
-};
+  || validPassFormat(password);
 
 module.exports = validationLogin;
