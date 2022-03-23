@@ -1,12 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
-const talkers = require('./src/getTalkers');
+const fs = require('fs/promises');
+const getTalkers = require('./src/getTalkers');
 const validationLogin = require('./src/validationLogin');
+const validationCad = require('./src/validationCad');
 
 const app = express();
 app.use(bodyParser.json());
-const token = () => crypto.randomBytes(8).toString('hex');
+const randomToken = () => crypto.randomBytes(8).toString('hex');
 
 const HTTP_OK_STATUS = 200;
 const HTTP_NOT_FOUND = 404;
@@ -18,15 +20,15 @@ app.get('/', (_request, response) => {
 });
 
 app.get('/talker', async (req, res) => {
-  if ((await talkers()).length === 0) {
+  if ((await getTalkers()).length === 0) {
     return res.status(HTTP_OK_STATUS).json([]);
   } 
-  return res.status(HTTP_OK_STATUS).json(await talkers());
+  return res.status(HTTP_OK_STATUS).json(await getTalkers());
 });
 
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
-  const talker = (await talkers()).find((talk) => talk.id === parseInt(id, 10));
+  const talker = (await getTalkers()).find((talk) => talk.id === parseInt(id, 10));
   if (!talker) {
     return res.status(HTTP_NOT_FOUND).json({ message: 'Pessoa palestrante não encontrada' });
   } 
@@ -34,13 +36,30 @@ app.get('/talker/:id', async (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const toke = token();
+  const token = randomToken();
   const { email, password } = req.body;
   const msg = validationLogin(email, password);
   if (msg) {
     return res.status(400).json({ message: msg });
   } 
-  return res.status(HTTP_OK_STATUS).json({ token: toke });
+  return res.status(HTTP_OK_STATUS).json({ token });
+});
+
+app.post('/talker', async (req, res) => {
+  const { authorization } = req.headers;
+  console.log(authorization);
+  const { name, age, talk } = req.body;
+  const validationReturn = validationCad(authorization, name, age, talk);
+  const talkers = JSON.parse(await fs.readFile('./talker.json'));
+  const id = talkers.length + 1;
+  const newTalker = { id, name, age, talk };
+  console.log(validationReturn);
+  if (validationReturn) {
+    return res.status(validationReturn.status).json({ message: validationReturn.msg });
+  }
+  talkers.push(newTalker); 
+  await fs.writeFile('./talker.json', JSON.stringify(talkers));
+  return res.status(201).json(newTalker);
 });
 
 app.listen(PORT, () => {
