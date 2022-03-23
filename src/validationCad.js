@@ -60,7 +60,7 @@ const validRate = (rate) => {
 };
 
 const validTalker = (talk) => {
-  if (!talk || talk.length === 0 || !talk.watchedAt || !talk.rate) {
+  if (!talk || talk.length === 0 || !talk.watchedAt || talk.rate === undefined) {
     return {
       status: 400,
       msg: 'O campo "talk" é obrigatório e "watchedAt" e "rate" não podem ser vazios',
@@ -81,4 +81,4 @@ const validationCad = (token, name, age, talk) =>
   || validAge(age)
   || validTalk(talk);
 
-module.exports = validationCad;
+module.exports = { validationCad, validToken };
